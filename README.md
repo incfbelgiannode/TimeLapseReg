@@ -1,3 +1,6 @@
-# StackReg-Plus_Multiple-Image-Alignment
+# StackReg-Plus 
 
-Complete code coming soon by August 24, 2015
+This code is for the imageJ plugin for aligning multiple timpelapse calcium imaging data
+visit the project website for more details
+
+http://neuroinformatics.be/projects/stackreg-plus-improved-multiple-image-alignment-with-imagej/
