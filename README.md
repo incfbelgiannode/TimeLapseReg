@@ -1,4 +1,4 @@
-# StackReg-Plus 
+# TimeLapseReg
 
 This code is for the imageJ plugin for aligning multiple timpelapse calcium imaging data
 visit the project website for more details
