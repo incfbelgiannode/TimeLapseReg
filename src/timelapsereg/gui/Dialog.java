@@ -26,7 +26,7 @@ public class Dialog extends JDialog implements ActionListener {
 	private PanelAlignment		pna;
 	private ProcessProgressBar	progress	= new ProcessProgressBar("TimelapseReg 1.0");
 	private JTabbedPane			tab			= new JTabbedPane();
-
+	public  static String projectPath ="";
 	public Dialog(Data data) {
 		super(new JFrame(), "TimelapseReg");
 
