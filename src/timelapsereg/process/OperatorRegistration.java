@@ -1,5 +1,9 @@
 package timelapsereg.process;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
@@ -28,6 +32,7 @@ public class OperatorRegistration implements Runnable {
 			thread.setPriority(Thread.MIN_PRIORITY);
 			thread.start();
 		}
+		
 	}
 
 	@Override
@@ -52,6 +57,12 @@ public class OperatorRegistration implements Runnable {
 		String rigid = " -rigidBody " + mark1 + mark1 + mark2 + mark2 + mark3 + mark3;
 		String ref = " -window " + experiment + dim;
 		int count = 0;
+		
+		//$$
+		try {
+			BufferedWriter br = new BufferedWriter(new FileWriter(data.pathProject+File.separator+"transformations2.csv"));
+		
+		//$$
 		for (Frame frame : data.frames) {
 			progress.progress("Register " + Tools.format(frame.getTime()), (count++)*100.0/data.frames.size());
 			data.scrollTable(frame);
@@ -68,6 +79,10 @@ public class OperatorRegistration implements Runnable {
 				double dy = (tpts[0][1] - spts[0][1]);
 				double angle = (180.0 * (tangle - sangle) / Math.PI);
 				double d = Math.sqrt(dx*dx+dy*dy);
+				
+				br.write(spts[0][0]+","+spts[0][1]+","+tpts[0][0]+","+tpts[0][1]+","+spts[1][0]+","+spts[1][1]+","+tpts[1][0]+","+tpts[1][1]+","+spts[2][0]+","+spts[2][1]+","+tpts[2][0]+","+tpts[2][1]);
+				br.write("\n");
+				
 				if (d > maxTranslation || angle > maxRotation) {
 					frame.setStatus(Frame.Status.INVALID_TRANSFORMATION);
 					frame.setTransformation(0, 0, 0);
@@ -75,6 +90,7 @@ public class OperatorRegistration implements Runnable {
 				else {
 					frame.setTransformation(dx, dy, angle);
 				}
+				data.updateTable();
 				canvas.repaint();
 			}
 			/*
@@ -96,6 +112,12 @@ public class OperatorRegistration implements Runnable {
 		TransformationTool.save(data);
 		TransformationTool.chart(data);
 		thread = null;
+		br.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 
 }
