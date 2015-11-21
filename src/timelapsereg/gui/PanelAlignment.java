@@ -25,6 +25,7 @@ import timelapsereg.gui.components.GridPanel;
 import timelapsereg.gui.settings.Settings;
 import timelapsereg.process.Data;
 import timelapsereg.TransformationTool;
+import turboreg.TurboReg_;
 
 public class PanelAlignment extends JPanel implements ActionListener {
 
@@ -35,19 +36,21 @@ public class PanelAlignment extends JPanel implements ActionListener {
 	private JButton			bnClose			= new JButton("Close");
 
 	public JTextField	txtProjectPath		= new JTextField(IJ.getDirectory("imagej"));
-	public JTextField	txtTransformFile	= new JTextField("locate transformations.csv");
+	// somehow set this to the folder containing the images/frames 
+	//public JTextField	txtProjectPath		= new JTextField(settings.loadValue("txtSourcePath", ""));
+	public JTextField	txtTransformFile	= new JTextField(File.separator+"transformations.csv");
 	public JTextField	txtAlignedFolder	= new JTextField("transformed");
 	public JTextField	txtReferenceImage	= new JTextField("reference Image");
-
+	
 	private Dialog dialog;
 	private Data data;
-		
-	public PanelAlignment(Dialog dialog, Data data, Settings settings) {
+	private String projectPath;
+	public PanelAlignment(Dialog dialog, Data data, Settings settings) 
+	{
 		this.dialog = dialog;
 		this.settings = settings;
 		this.data = data;
 		settings.loadRecordedItems();
-
 	
 		GridPanel pn = new GridPanel(true);
 		pn.place(0, 0, "Project path");
@@ -72,15 +75,26 @@ public class PanelAlignment extends JPanel implements ActionListener {
 		bnStart.addActionListener(this);
 		bnBrowseTransformation.addActionListener(this);
 
+		txtProjectPath.setText(settings.loadValue("txtSourcePath", ""));
+		txtTransformFile.setText(settings.loadValue("txtOutputPath", "") +File.separator+"transformations.csv");
+		
+		
 		add(main);
+		System.out.println("Project path $$$!!$$$: "+settings.getProject());
+		System.out.println("Project path $$$!!$$$: "+settings.getFilename());
+		System.out.println("Loading path from the settings class: "+ settings.loadValue("txtSourcePath", ""));
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent event) {
+	public void actionPerformed(ActionEvent event) 
+	{
+		projectPath = Dialog.projectPath;
+		System.out.println("in the button press of Panel Alignment: "+projectPath);
 		if (event.getSource() == bnClose)
 			close();
 		
-		else if (event.getSource() == bnBrowse) {
+		else if (event.getSource() == bnBrowse) 
+		{
 			JFileChooser chooser = new JFileChooser();
 			chooser.setCurrentDirectory(new File("."));
 			chooser.setDialogTitle("Select the project path");
@@ -88,11 +102,13 @@ public class PanelAlignment extends JPanel implements ActionListener {
 			chooser.setAcceptAllFileFilterUsed(false);
 			chooser.setApproveButtonText("Select");
 
-			if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) 
+			{
 				txtProjectPath.setText(chooser.getSelectedFile().getAbsolutePath());
 			}
 		}
-		else if (event.getSource() == bnBrowseTransformation) {
+		else if (event.getSource() == bnBrowseTransformation) 
+		{
 			JFileChooser chooser = new JFileChooser();
 			chooser.setCurrentDirectory(new File("."));
 			chooser.setDialogTitle("Select the Reference image");
@@ -134,8 +150,7 @@ public class PanelAlignment extends JPanel implements ActionListener {
 					values[i][1] = Double.parseDouble(tkn.nextToken());
 					values[i][2] = Double.parseDouble(tkn.nextToken());
 					tkn.nextToken();
-					tkn.nextToken();
-					
+					tkn.nextToken();					
 				}
 				br.close();
 				
@@ -144,17 +159,66 @@ public class PanelAlignment extends JPanel implements ActionListener {
 				int width = infoF.width;
 				int height = infoF.height;
 				ImageStack stack = new ImageStack(width,height);
+				ImageStack stack2 = new ImageStack(width,height);
+				
+				//$$
+				String[][] Amark = new String[num_files][6];
+				String[][] Bmark = new String[num_files][6];
+				String pathProject = projectPath+File.separator+"transformations2.csv";
+				System.out.println("Heyyya   "+pathProject);
+				BufferedReader br2 = new  BufferedReader(new FileReader(projectPath+File.separator+"transformations2.csv"));
+				
+				
+				String temp2 = br2.readLine();
+				for(int i=0 ; i<num_files ; i++)
+				{
+					//if((temp = br2.readLine()) ==null)
+						//break;
+					StringTokenizer tkn = new StringTokenizer(temp2,",");					
+					Amark[i][0] = tkn.nextToken();
+					Amark[i][1] = tkn.nextToken();
+					Bmark[i][0] = tkn.nextToken();
+					Bmark[i][1] = tkn.nextToken();
+					
+					Amark[i][2] = tkn.nextToken();
+					Amark[i][3] = tkn.nextToken();
+					Bmark[i][2] = tkn.nextToken();
+					Bmark[i][3] = tkn.nextToken();
+					
+					Amark[i][4] = tkn.nextToken();
+					Amark[i][5] = tkn.nextToken();
+					Bmark[i][4] = tkn.nextToken();
+					Bmark[i][5] = tkn.nextToken();
+					
+					
+				}
+				br2.close();
+				
+				TurboReg_ reg = new TurboReg_();
+				
+				
+				//$$
+				
+				
 				for(int i=0 ; i<num_files ; i++)
 				{
 					ImagePlus ip2 = new ImagePlus(filenames[i]);
 					ImageProcessor ip3 = ip2.getProcessor();
+					
 					ip3.translate(-values[i][0], -values[i][1]);
 					ip3.rotate(-values[i][2]);
+					stack2.addSlice(ip3);
+					
+					String rigid = " -rigidBody " + Amark[i][0] +" "+Amark[i][1]+" "+Bmark[i][0]+" "+Bmark[i][1]+" "+Amark[i][2]+" "+Amark[i][3]+" "+Bmark[i][2] +" "+Bmark[i][3]+" "+Amark[i][4]+" "+Amark[i][5]+" "+Bmark[i][4]+" "+Bmark[i][5]+" ";
+					String options = "-transform -file "+ filenames[i]+" " + width + " " + height  + " " + rigid + "-hideOutput";
+					reg.run(options);
+					ip2 = reg.getTransformedImage();
 					
 					System.out.println("Hello: "+(i+1));
 					stack.addSlice("image", ip2.getProcessor());
 				}
 				new ImagePlus("Aligned Stacks", stack).show();
+				new ImagePlus("Aligned Stacks2", stack2).show();
 				
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
