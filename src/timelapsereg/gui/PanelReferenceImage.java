@@ -24,7 +24,8 @@ import timelapsereg.process.ReferenceImageConstant;
 public class PanelReferenceImage extends GridPanel implements ActionListener {
 
 	private JComboBox			cmbMode				= new JComboBox(ReferenceImageConstant.modesGUI);
-	private String[] 			metric				= new String[] {"Average", "Median", "Maximum", "Minimum"};
+	//private String[] 			metric				= new String[] {"Average", "Median", "Maximum", "Minimum"};
+	private String[] 			metric				= new String[] {"Average", "Maximum", "Minimum"};
 	private JComboBox			cmbMethodPercentage	= new JComboBox(metric);
 	private JComboBox			cmbMethodRange		= new JComboBox(metric);
 	private JComboBox			cmbMethodSliding	= new JComboBox(metric);
