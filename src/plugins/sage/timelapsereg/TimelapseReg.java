@@ -1,4 +1,5 @@
 package plugins.sage.timelapsereg;
+// here this class is in the package - plugins.sage.timelapsereg
 
 import icy.gui.dialog.MessageDialog;
 import icy.plugin.abstract_.PluginActionable;
