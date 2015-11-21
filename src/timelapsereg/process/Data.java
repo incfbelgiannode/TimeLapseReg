@@ -1,84 +1,80 @@
-package timelapsereg.gui;
+package timelapsereg.process;
 
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Rectangle;
+import java.util.ArrayList;
 
-import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import javax.swing.JToolBar;
 
-import ij.IJ;
-import ij.gui.GUI;
-import timelapsereg.gui.components.ProcessProgressBar;
-import timelapsereg.gui.settings.Settings;
-import timelapsereg.process.Data;
+import ij.ImagePlus;
+import timelapsereg.gui.TableFrames;
+import timelapsereg.process.Frame.Status;
 
-public class Dialog extends JDialog implements ActionListener {
+public class Data {
 
-	private Settings			settings	= new Settings("TimelapseReg", IJ.getDirectory("plugins") + "TimelapseReg.txt");
-	private JButton				bnHelp		= new JButton("Help");
-	private JButton				bnClose		= new JButton("Close");
-	private PanelRegistration	pnr;
-	private PanelAlignment		pna;
-	private ProcessProgressBar	progress	= new ProcessProgressBar("TimelapseReg 1.0");
-	private JTabbedPane			tab			= new JTabbedPane();
-	public  static String projectPath ="";
-	public Dialog(Data data) {
-		super(new JFrame(), "TimelapseReg");
-
-		pnr = new PanelRegistration(this, data, settings);
-		pna = new PanelAlignment(this, data, settings);
+	public String pathProject = "";
+	public String pathSource = "";
+	public String pathOutput = "";
+	public ArrayList<Frame> frames = new ArrayList<Frame>();
+	public double framerate = 100;
+	public ImagePlus ref;
+	public double mean = 0;
+	public double stdev = 0;
 	
-		tab.add("Registration", pnr);
-		tab.add("Alignement", pna);
-
-		JToolBar tool = new JToolBar();
-		tool.setFloatable(false);
-		tool.add(bnHelp);
-		tool.add(progress);
-		tool.add(bnClose);
-
-		JPanel main = new JPanel(new BorderLayout());
-		main.add(tab, BorderLayout.CENTER);
-		main.add(tool, BorderLayout.SOUTH);
-
-		bnClose.addActionListener(this);
-		bnHelp.addActionListener(this);
-
-		add(main);
-		pack();
-		GUI.center(this);
-		setVisible(true);
+	public JFrame frame = null;
+	private TableFrames table;
+	
+	public double getReferenceMean() {
+		return mean;
 	}
-
-	@Override
-	public void actionPerformed(ActionEvent event) {
-		if (event.getSource() == bnClose) {
-			pna.close();
-			pnr.close();
-			bnClose.removeActionListener(this);
-			settings.storeRecordedItems();
-			dispose();
+	
+	public double getReferenceStdev() {
+		return stdev;
+	}
+	
+	
+	public Frame.Status getStatusFrame(int num) {
+		for(Frame frame : frames)
+			if (frame.number == num) 
+				return frame.getStatus();
+		return Status.NONE;
+	}
+	public void showReference() {
+		if (ref == null)
+			return;
+		ref.show();
+	}
+			
+	public void updateTable() {
+		if (table != null)
+			table.update();
+	}
+	
+	public void scrollTable(Frame frame) {
+		if (table != null) {
+			for(int i=0; i<frames.size(); i++) {
+				if (frames.get(i).number == frame.number) {
+					table.getSelectionModel().setSelectionInterval(i, i);
+					table.scrollRectToVisible(new Rectangle(table.getCellRect(i, 0, true)));
+				}
+			}
 		}
 	}
-
-	public ProcessProgressBar getProgressBar() {
-		return progress;
+	
+	public void showFramesAsTable() {
+		if (frame != null) {
+			frame.dispose();
+			frame = null;
+			table.removeAll();
+			table = null;
+			System.gc();
+		}
+		
+		frame = new JFrame(pathSource);
+		table = new TableFrames(this);
+		frame.getContentPane().add(table.getPane(700, 500));
+		frame.pack();
+		frame.setVisible(true);
 	}
-
-	public void progress(String msg, double unit) {
-		progress.progress(msg, unit * 100.0);
-	}
-
-	public void progress(String msg, int position, int capacity) {
-		progress.progress(msg, position * 100.0 / capacity);
-	}
-
-	public void setSelectedIndex(int index) {
-		tab.setSelectedIndex(index);
-	}
+	
+	
 }
