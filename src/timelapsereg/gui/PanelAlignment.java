@@ -77,7 +77,7 @@ public class PanelAlignment extends JPanel implements ActionListener {
 
 		txtProjectPath.setText(settings.loadValue("txtSourcePath", ""));
 		txtTransformFile.setText(settings.loadValue("txtOutputPath", "") +File.separator+"transformations.csv");
-		
+		txtAlignedFolder.setText(settings.loadValue("txtOutputPath","")+File.separator);
 		
 		add(main);
 		System.out.println("Project path $$$!!$$$: "+settings.getProject());
@@ -220,6 +220,16 @@ public class PanelAlignment extends JPanel implements ActionListener {
 					
 					System.out.println("Hello: "+(i+1));
 					stack.addSlice("image", ip2.getProcessor());
+
+					// Following 2 lines save the images after being transformed in 2 folders based on the 2 methods being used here 
+					// method 1 =  using turboreg to align the 2 images
+					// method 2 = using simple translate and rotate to align the images
+					File dir2 = new File(txtAlignedFolder.getText()+"method1");
+					dir2.mkdir();
+					File dir3 = new File(txtAlignedFolder.getText()+"method2");
+					dir3.mkdir();					
+					IJ.saveAs(ip2, "png", txtAlignedFolder.getText()+"method1\\frame"+i+".png");
+					IJ.saveAs(ip2, "png", txtAlignedFolder.getText()+"method2\\frame"+i+".png");
 				}
 				new ImagePlus("Aligned Stacks", stack).show();
 				new ImagePlus("Aligned Stacks2", stack2).show();
