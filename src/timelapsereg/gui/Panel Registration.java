@@ -1,4 +1,3 @@
-
 package timelapsereg.gui;
 
 import java.awt.BorderLayout;
@@ -78,10 +77,7 @@ public class PanelRegistration extends JPanel implements ActionListener, ChangeL
 		settings.record("spnFrameRate", spnFrameRate, "100");
 		settings.record("spnMaxRotation", spnMaxRotation, "20");
 		settings.record("spnMaxTranslation", spnMaxTranslation, "20");
-		//settings.storeRecordedItems();
-		
-		
-		
+		//settings.storeRecordedItems();		
 		settings.loadRecordedItems();
 
 		// Step 1
@@ -204,7 +200,7 @@ public class PanelRegistration extends JPanel implements ActionListener, ChangeL
 			if (card.equals("source"))
 				reader();
 			else if (card.equals("reference"))
-				pnReference.computeReferenceImage(true);
+				pnReference.computeReferenceImage(false);
 			else if (card.equals("checkin"))
 				reference();
 			else if (card.equals("register"))
