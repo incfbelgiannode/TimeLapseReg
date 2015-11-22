@@ -170,6 +170,7 @@ public class PanelAlignment extends JPanel implements ActionListener {
 				
 				
 				String temp2 = br2.readLine();
+				// this loop involves aligning the images using the turboreg plugin - this for somereason does not give good alignment needs to be figured out why
 				for(int i=0 ; i<num_files ; i++)
 				{
 					//if((temp = br2.readLine()) ==null)
@@ -199,6 +200,8 @@ public class PanelAlignment extends JPanel implements ActionListener {
 				
 				//$$
 				
+				//following loop aligns the images based on simple translation and rotations without using the turboreg plugin
+				//this loop also includes the saving of the transformed files in the aligned folder
 				
 				for(int i=0 ; i<num_files ; i++)
 				{
@@ -208,6 +211,7 @@ public class PanelAlignment extends JPanel implements ActionListener {
 					ip3.translate(-values[i][0], -values[i][1]);
 					ip3.rotate(-values[i][2]);
 					stack2.addSlice(ip3);
+				
 					
 					String rigid = " -rigidBody " + Amark[i][0] +" "+Amark[i][1]+" "+Bmark[i][0]+" "+Bmark[i][1]+" "+Amark[i][2]+" "+Amark[i][3]+" "+Bmark[i][2] +" "+Bmark[i][3]+" "+Amark[i][4]+" "+Amark[i][5]+" "+Bmark[i][4]+" "+Bmark[i][5]+" ";
 					String options = "-transform -file "+ filenames[i]+" " + width + " " + height  + " " + rigid + "-hideOutput";
@@ -228,6 +232,7 @@ public class PanelAlignment extends JPanel implements ActionListener {
 			{
 				System.out.println(filenames[i]);
 			}
+			
 		}
 	}
 
