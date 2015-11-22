@@ -59,7 +59,7 @@ public class OperatorReference {
 				data.stdev = stats.stdDev;
 				System.out.println("Successfully read!!");
 				imp.hide();
-				imp.show();
+				//imp.show();
 				return;
 			}
 			else
@@ -78,7 +78,7 @@ public class OperatorReference {
 				ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
 				data.mean = stats.mean;
 				data.stdev = stats.stdDev;
-				imp.show();
+				//imp.show();
 			}
 		}
 		// following conditions illustrates a concept which has been replicated for computing the reference image over a specified range of frames also
@@ -104,14 +104,14 @@ public class OperatorReference {
 					i0 = calc.run("Average create 32-bit", i0, i1);
 				}
 				i0.setTitle("reference image");
-				i0.show();
+				//i0.show();
 				data.ref = i0;
 				int s = ImageStatistics.MEAN | ImageStatistics.STD_DEV;
 				ImageProcessor ip = data.ref.getProcessor();
 				ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
 				data.mean = stats.mean;
 				data.stdev = stats.stdDev;
-				data.ref.show();
+				//data.ref.show();
 				
 				System.out.println(param1+"   "+param2);
 			}
@@ -124,14 +124,14 @@ public class OperatorReference {
 					i0 = calc.run("Min create 32-bit", i0, i1);
 				}
 				i0.setTitle("reference image");
-				i0.show();
+				//i0.show();
 				data.ref = i0;
 				int s = ImageStatistics.MEAN | ImageStatistics.STD_DEV;
 				ImageProcessor ip = data.ref.getProcessor();
 				ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
 				data.mean = stats.mean;
 				data.stdev = stats.stdDev;
-				data.ref.show();
+				//data.ref.show();
 				
 				System.out.println(param1+"   "+param2);
 			}
@@ -146,14 +146,14 @@ public class OperatorReference {
 					i0 = calc.run("Max create 32-bit", i0, i1);
 				}
 				i0.setTitle("reference image");
-				i0.show();
+				//i0.show();
 				data.ref = i0;
 				int s = ImageStatistics.MEAN | ImageStatistics.STD_DEV;
 				ImageProcessor ip = data.ref.getProcessor();
 				ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
 				data.mean = stats.mean;
 				data.stdev = stats.stdDev;
-				data.ref.show();
+				//data.ref.show();
 				
 				System.out.println(param1+"   "+param2);
 			}
@@ -201,14 +201,14 @@ public class OperatorReference {
 					i0 = calc.run("Average create 32-bit", i0, i1);
 				}
 				i0.setTitle("reference image");
-				i0.show();
+				//i0.show();
 				data.ref = i0;
 				int s = ImageStatistics.MEAN | ImageStatistics.STD_DEV;
 				ImageProcessor ip = data.ref.getProcessor();
 				ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
 				data.mean = stats.mean;
 				data.stdev = stats.stdDev;
-				data.ref.show();
+				//data.ref.show();
 				
 				System.out.println(param1+"   "+param2+"   "+param3);
 			}
@@ -221,14 +221,14 @@ public class OperatorReference {
 					i0 = calc.run("Min create 32-bit", i0, i1);
 				}
 				i0.setTitle("reference image");
-				i0.show();
+				//i0.show();
 				data.ref = i0;
 				int s = ImageStatistics.MEAN | ImageStatistics.STD_DEV;
 				ImageProcessor ip = data.ref.getProcessor();
 				ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
 				data.mean = stats.mean;
 				data.stdev = stats.stdDev;
-				data.ref.show();
+				//data.ref.show();
 				
 				System.out.println(param1+"   "+param2+"  "+param3);
 			}
@@ -241,14 +241,14 @@ public class OperatorReference {
 					i0 = calc.run("Max create 32-bit", i0, i1);
 				}
 				i0.setTitle("reference image");
-				i0.show();
+				//i0.show();
 				data.ref = i0;
 				int s = ImageStatistics.MEAN | ImageStatistics.STD_DEV;
 				ImageProcessor ip = data.ref.getProcessor();
 				ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
 				data.mean = stats.mean;
 				data.stdev = stats.stdDev;
-				data.ref.show();
+				//data.ref.show();
 				
 				System.out.println(param1+"   "+param2+"  "+param3);
 			}
