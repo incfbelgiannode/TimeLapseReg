@@ -1,13 +1,16 @@
 package timelapsereg.process;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.io.Opener;
+import ij.process.ByteProcessor;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
+import ij.process.ShortProcessor;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
-import ij.IJ;
 import timelapsereg.TransformationTool;
 import timelapsereg.TransformationsCanvas;
 import timelapsereg.gui.components.ProcessProgressBar;
@@ -19,20 +22,21 @@ public class OperatorRegistration implements Runnable {
 	private Thread				thread	= null;
 	private Data				data;
 
-	private double	maxTranslation;
-	private double	maxRotation;
+	private double				maxDisplacement;
+	private String				chartAs;
+	private String				drawAs;
 
-	public OperatorRegistration(ProcessProgressBar progress, Data data, double maxTranslation, double maxRotation) {
+	public OperatorRegistration(ProcessProgressBar progress, Data data, double maxDisplacement, String chartAs, String drawAs) {
 		this.progress = progress;
 		this.data = data;
-		this.maxTranslation = maxTranslation;
-		this.maxRotation = maxRotation;
+		this.maxDisplacement = maxDisplacement;
+		this.chartAs = chartAs;
+		this.drawAs = drawAs;
 		if (thread == null) {
 			thread = new Thread(this);
 			thread.setPriority(Thread.MIN_PRIORITY);
 			thread.start();
 		}
-		
 	}
 
 	@Override
@@ -44,80 +48,132 @@ public class OperatorRegistration implements Runnable {
 		data.ref.show();
 		data.ref.setTitle(experiment);
 
-		TransformationsCanvas canvas = new TransformationsCanvas(data.ref, data);
+		TransformationsCanvas canvas = null;
+		if (!drawAs.equals("None"))
+			canvas = new TransformationsCanvas(data.ref, data, drawAs);
 
-		TurboReg_ reg = new TurboReg_();
+		TurboReg_ turboReg = new TurboReg_();
 		int nx = data.ref.getWidth();
 		int ny = data.ref.getHeight();
-		String mark1 = "0 " + nx / 2 + " ";
-		String mark2 = nx / 2 + " " + ny / 2 + " ";
-		String mark3 = nx / 2 + " " + ny + " ";
-
+		String mark1 = " " + (nx * 0.1) + " " + (ny / 2) + " ";
+		String mark2 = " " + (nx * 0.5) + " " + (ny / 2) + " ";
+		String mark3 = " " + (nx * 0.9) + " " + (ny / 2) + " ";
+		if (ny > nx) {
+			mark1 = " " + (nx / 2) + " " + (ny * 0.1) + " ";
+			mark2 = " " + (nx / 2) + " " + (ny * 0.5) + " ";
+			mark3 = " " + (nx / 2) + " " + (ny * 0.9) + " ";
+		}
 		String dim = "" + " 0 0 " + (nx - 1) + " " + (ny - 1);
 		String rigid = " -rigidBody " + mark1 + mark1 + mark2 + mark2 + mark3 + mark3;
 		String ref = " -window " + experiment + dim;
 		int count = 0;
 		
-		//$$
-		try {
-			BufferedWriter br = new BufferedWriter(new FileWriter(data.pathProject+File.separator+"transformations2.csv"));
-		
-		//$$
+		FloatProcessor fpRef = (FloatProcessor)data.ref.getProcessor();
+		Opener opener = new Opener();
 		for (Frame frame : data.frames) {
-			progress.progress("Register " + Tools.format(frame.getTime()), (count++)*100.0/data.frames.size());
+			progress.progress("Register " + Tools.format(frame.getTime()), (count++) * 100.0 / data.frames.size());
 			data.scrollTable(frame);
 			if (frame.isValid()) {
+				ImageProcessor fimp = opener.openImage(frame.getPath()).getProcessor();
+
 				String target = " -file \"" + frame.getPath() + "\"" + dim;
 				String options = "-align " + ref + target + rigid + "-hideOutput";
-				reg.run(options);
-				double spts[][] = reg.getSourcePoints();
-				double tpts[][] = reg.getTargetPoints();
-
-				double sangle = Math.atan2(spts[2][1] - spts[1][1], spts[2][0] - spts[1][0]);
-				double tangle = Math.atan2(tpts[2][1] - tpts[1][1], tpts[2][0] - tpts[1][0]);
-				double dx = (tpts[0][0] - spts[0][0]);
-				double dy = (tpts[0][1] - spts[0][1]);
-				double angle = (180.0 * (tangle - sangle) / Math.PI);
-				double d = Math.sqrt(dx*dx+dy*dy);
+				turboReg.run(options);
+				double spts[][] = turboReg.getSourcePoints();
+				double tpts[][] = turboReg.getTargetPoints();
 				
-				br.write(spts[0][0]+","+spts[0][1]+","+tpts[0][0]+","+tpts[0][1]+","+spts[1][0]+","+spts[1][1]+","+tpts[1][0]+","+tpts[1][1]+","+spts[2][0]+","+spts[2][1]+","+tpts[2][0]+","+tpts[2][1]);
-				br.write("\n");
+				/* back reconstruction
+				IJ.log("\n " + frame.getPath() + String.format(" transformation: dx=%3.2f dy=%3.2f a=%3.2f ", dx1, dy1, angle1));
+				double xpts[] = new double[3];
+				double ypts[] = new double[3];
+				for(int i=0; i<3; i++) {
+					double x = tpts[i][0];
+					double y = tpts[i][1];
+					double a = angle1 * Math.PI / 180;		
+					xpts[i] = Math.cos(a) * x + Math.sin(a) * y;
+					ypts[i] = -Math.sin(a) * x + Math.cos(a) * y;
+				}
 				
-				if (d > maxTranslation || angle > maxRotation) {
-					frame.setStatus(Frame.Status.INVALID_TRANSFORMATION);
-					frame.setTransformation(0, 0, 0);
+				for(int i=0; i<3; i++) {
+					xpts[i] = xpts[i] - dx1;
+					ypts[i] = ypts[i] - dy1;
+				}
+				for(int i=0; i<3; i++) 
+					IJ.log(String.format("(%3.2f %3.2f) > (%3.2f %3.2f) ", tpts[i][0], tpts[i][1], spts[i][0], spts[i][1]));
+				*/
+				
+				if (checkDistance(spts, tpts, maxDisplacement)) {
+					frame.setStatus(Frame.Status.OK);
+					frame.getTransformation().set(spts, tpts);
+					String p = "";
+					for(int i=0; i<3; i++) 
+						p += " " + tpts[i][0] + " " + tpts[i][1] + " " + spts[i][0] + " " + spts[i][1] + " ";
+					String t = " -file \"" + frame.getPath() + "\" " + (nx) + " " + (ny) + " ";
+					String options1 = "-transform " + t + " -rigidBody " + p + " -hideOutput";
+					turboReg.run(options1);
+					ImagePlus imp = turboReg.getTransformedImage();			
+					if (imp != null) {
+						if (imp.getStackSize() == 2) {
+							frame.setRMSE(rmse(fpRef, fimp), rmse(fpRef, (FloatProcessor)imp.getProcessor()));
+						}
+					}
 				}
 				else {
-					frame.setTransformation(dx, dy, angle);
+					frame.setStatus(Frame.Status.INVALID_TRANSFORMATION);
+					frame.getTransformation().init(nx, ny);
+					frame.setRMSE(rmse(fpRef, fimp), -1);
 				}
-				data.updateTable();
-				canvas.repaint();
+				
+				if (canvas != null)
+					canvas.repaint();
+				
 			}
-			/*
-			 * ImagePlus imp2 = reg.getTransformedImage();
-			 * stack.addSlice("image", imp2.getProcessor());
-			 * 
-			 * progress.progress("Registration",
-			 * (count++)*100.0/data.frames.size());
-			 * 
-			 * ImagePlus imp = opener.openImage(frame.getFilename()); if (imp !=
-			 * null) { if (!ready) { canvas = new TransformationsCanvas(imp,
-			 * transformations); ready = true; } else { double dx =
-			 * x_coordinate; double dy = y_coordinate; double angle =
-			 * angle_coordinate; Transformation t = new Transformation(count,
-			 * dx, dy, angle); transformations.add(t); if (canvas != null)
-			 * canvas.repaint(); } }
-			 */
+			data.updateTable();
 		}
 		TransformationTool.save(data);
-		TransformationTool.chart(data);
+		progress.progress("End of " + count + " Registrations", 100);
+
+		if (chartAs.equals("Translation and rotation"))
+			TransformationTool.chart(data, 3);
+		if (chartAs.equals("Only translation"))
+			TransformationTool.chart(data, 1);
+		if (chartAs.equals("Only rotation"))
+			TransformationTool.chart(data, 2);
 		thread = null;
-		br.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
 	}
 
+	private boolean checkDistance(double[][] source, double[][] target, double maxDisplacement) {
+		for(int i=0; i<3; i++) {
+			double dx = source[i][0] - target[i][0];
+			double dy = source[i][1] - target[i][1];
+			double d = Math.sqrt(dx * dx + dy * dy);
+			if (d > maxDisplacement) {
+				return false;
+			}
+		}
+		return true;
+	
+	}
+	private double rmse(FloatProcessor ref, ImageProcessor ip) {
+		float[] r = (float[])ref.getPixels();
+		int n = r.length;
+		float rmse = 0f;
+		if (ip instanceof ByteProcessor) {
+			byte[] t = (byte[])ip.getPixels();
+			for(int k=0; k<n; k++)
+				rmse += (r[k]-t[k])*(r[k]-t[k]);
+		
+		}
+		else if (ip instanceof ShortProcessor) {
+			short[] t = (short[])ip.getPixels();
+			for(int k=0; k<n; k++)
+				rmse += (r[k]-t[k])*(r[k]-t[k]);
+		}
+		else {
+			float[] t = (float[])ip.getPixels();
+			for(int k=0; k<n; k++)
+				rmse += (r[k]-t[k])*(r[k]-t[k]);
+		}
+		return Math.sqrt(rmse / n);
+	}
 }
