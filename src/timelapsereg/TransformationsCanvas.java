@@ -42,10 +42,17 @@ public class TransformationsCanvas extends ImageCanvas {
 	private Dimension	dim;
 	private Image		offscreen;
 	private Graphics2D	bufferGraphics;
-
-	public TransformationsCanvas(ImagePlus imp, Data data) {
+	private Color 		color = new Color(200, 200, 0);
+	
+	public TransformationsCanvas(ImagePlus imp, Data data, String color) {
 		super(imp);
 		this.data = data;
+		if (color.equals("Red"))
+			this.color = new Color(255, 0, 0);
+		if (color.equals("Black"))
+			this.color = new Color(0, 0, 0);
+		if (color.equals("White"))
+			this.color = new Color(255, 255, 255);
 		canvasOriginal = imp.getCanvas();
 		if (imp.getStackSize() > 1)
 			imp.setWindow(new StackWindow(imp, this));
@@ -89,14 +96,17 @@ public class TransformationsCanvas extends ImageCanvas {
 		if (data.frames.size() < 2)
 			return;
 
-		int hx = imp.getWidth() / 2;
-		int hy = imp.getWidth() / 2;
-		for (int i = 1; i < data.frames.size(); i++) {
-			Transformation p = data.frames.get(i - 1).getTransformation();
+		for (int i = 0; i < data.frames.size(); i++) {
 			Transformation t = data.frames.get(i).getTransformation();
-			bufferGraphics.setColor(new Color(200, 200, 10, 100));
-			bufferGraphics.setStroke(new BasicStroke(4));
-			bufferGraphics.drawLine(screenXD(p.dx + hx), screenYD(p.dy + hy), screenXD(t.dx + hx), screenYD(t.dy + hy));
+			bufferGraphics.setColor(color);
+			bufferGraphics.setStroke(new BasicStroke(2));
+			if (i > 0) {
+				Transformation p = data.frames.get(i - 1).getTransformation();
+				bufferGraphics.drawLine(screenXD(t.source[1].x), screenYD(t.source[1].y), screenXD(p.source[1].x), screenYD(p.source[1].y));
+			}
+			bufferGraphics.setColor(new Color(200, 200, 200, 100));
+			bufferGraphics.setStroke(new BasicStroke(1));
+			bufferGraphics.drawLine(screenXD(t.source[0].x), screenYD(t.source[0].y), screenXD(t.source[2].x), screenYD(t.source[2].y));
 		}
 		g.drawImage(offscreen, 0, 0, this);
 	}
