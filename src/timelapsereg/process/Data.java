@@ -31,13 +31,13 @@ public class Data {
 		return stdev;
 	}
 	
-	
 	public Frame.Status getStatusFrame(int num) {
 		for(Frame frame : frames)
 			if (frame.number == num) 
 				return frame.getStatus();
 		return Status.NONE;
 	}
+	
 	public void showReference() {
 		if (ref == null)
 			return;
