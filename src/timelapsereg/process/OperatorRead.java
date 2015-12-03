@@ -12,10 +12,14 @@ public class OperatorRead implements Runnable {
 	private ProcessProgressBar	progress;
 	private Thread				thread	= null;
 	private Data				data;
+	private int					maxNbFrame;
+	private String				pattern;
 
-	public OperatorRead(ProcessProgressBar progress, Data data) {
+	public OperatorRead(ProcessProgressBar progress, Data data, int maxNbFrame, String pattern) {
 		this.progress = progress;
 		this.data = data;
+		this.maxNbFrame = maxNbFrame;
+		this.pattern = pattern.toLowerCase();
 		if (thread == null) {
 			thread = new Thread(this);
 			thread.setPriority(Thread.MIN_PRIORITY);
@@ -37,18 +41,24 @@ public class OperatorRead implements Runnable {
 		Opener opener = new Opener();
 		int n = files.length;
 		int count = 0;
-		for(File file : files) {
-			progress.progress(file.getName(), count*100.0/n);
-			ImagePlus imp = opener.openImage(file.getAbsolutePath());
-			if (imp != null) {
-				Frame frame = new Frame(data.frames.size()+1, data.framerate, file.getAbsolutePath(), file.getName(), imp);
-				data.frames.add(frame);
+
+		for (File file : files) {
+			if (file.getName().toLowerCase().contains(pattern)) {
+				progress.progress(file.getName(), count * 100.0 / n);
+				ImagePlus imp = opener.openImage(file.getAbsolutePath());
+				if (imp != null) {
+					Frame frame = new Frame(data.frames.size() + 1, data.framerate, file.getAbsolutePath(), file.getName(), imp);
+					data.frames.add(frame);
+					count++;
+					if (count >= maxNbFrame)
+						break;
+				}
 			}
-			count++;
 		}
 		progress.progress("" + data.frames.size() + " frames", 100);
 
 		if (data.frames.size() > 0)
 			data.showFramesAsTable();
-		thread=null;
-}}
+		thread = null;
+	}
+}
