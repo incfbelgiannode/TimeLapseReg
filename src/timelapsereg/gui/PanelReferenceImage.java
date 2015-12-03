@@ -1,9 +1,5 @@
 package timelapsereg.gui;
 
-import ij.ImagePlus;
-import ij.io.FileSaver;
-import ij.plugin.ImageCalculator;
-
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
@@ -23,13 +19,13 @@ import timelapsereg.process.ReferenceImageConstant;
 
 public class PanelReferenceImage extends GridPanel implements ActionListener {
 
-	private JComboBox			cmbMode				= new JComboBox(ReferenceImageConstant.modesGUI);
+	private JComboBox	cmbMode				= new JComboBox(ReferenceImageConstant.modesGUI);
 	//private String[] 			metric				= new String[] {"Average", "Median", "Maximum", "Minimum"};
-	private String[] 			metric				= new String[] {"Average", "Maximum", "Minimum"};
-	private JComboBox			cmbMethodPercentage	= new JComboBox(metric);
-	private JComboBox			cmbMethodRange		= new JComboBox(metric);
-	private JComboBox			cmbMethodSliding	= new JComboBox(metric);
-	private JComboBox			cmbMethodBlock		= new JComboBox(metric);
+	private String[] 			metric				= new String[] {"Average", "Maximum", "Minimum"};	
+	private JComboBox	cmbMethodPercentage	= new JComboBox(new String[] { "Average", "Median", "Maximum", "Minimum" });
+	private JComboBox	cmbMethodRange		= new JComboBox(new String[] { "Average", "Median", "Maximum", "Minimum" });
+	private JComboBox	cmbMethodSliding	= new JComboBox(new String[] { "Average", "Median", "Maximum", "Minimum" });
+	private JComboBox	cmbMethodBlock		= new JComboBox(new String[] { "Average", "Median", "Maximum", "Minimum" });
 	private JTextField			txtWindow			= new JTextField("", 20);
 	private JTextField			txtFile				= new JTextField("", 20);
 	private SpinnerInteger		spnPosition			= new SpinnerInteger(1, 1, 999999, 1);
@@ -39,10 +35,10 @@ public class PanelReferenceImage extends GridPanel implements ActionListener {
 	private SpinnerInteger		spnSliding			= new SpinnerInteger(100, 1, 999999, 1);
 	private SpinnerInteger		spnBlock			= new SpinnerInteger(100, 1, 999999, 1);
 
-	private GridPanel			panels[]			= new GridPanel[ReferenceImageConstant.modes.length];
-	private JPanel				cards				= new JPanel(new CardLayout());
+	private GridPanel			panels[]	= new GridPanel[ReferenceImageConstant.modes.length];
+	private JPanel				cards		= new JPanel(new CardLayout());
 	private ProcessProgressBar	progress;
-	public static Data				data;
+	private Data				data;
 
 	public PanelReferenceImage(ProcessProgressBar progress, Settings settings, Data data) {
 		super(false);
@@ -73,13 +69,11 @@ public class PanelReferenceImage extends GridPanel implements ActionListener {
 		panels[0].place(0, 0, "Frame Position");
 		panels[0].place(0, 1, spnPosition);
 
-		
-		
 		panels[1].place(0, 0, "Title of the window");
-		panels[1].place(1, 0, txtWindow);
+		panels[1].place(1, 0, txtFile);
 
 		panels[2].place(0, 0, "Filename");
-		panels[2].place(1, 0, txtFile);
+		panels[2].place(1, 0, txtWindow);
 
 		panels[3].place(0, 0, "Method");
 		panels[3].place(0, 1, cmbMethodPercentage);
@@ -109,13 +103,12 @@ public class PanelReferenceImage extends GridPanel implements ActionListener {
 		panels[6].place(1, 0, "Size of the block");
 		panels[6].place(1, 1, spnBlock);
 		panels[6].place(1, 2, "frames");
-		 */
+		*/
 		for (int i = 0; i < ReferenceImageConstant.modes.length; i++)
 			cards.add(panels[i], ReferenceImageConstant.modes[i]);
 
 		//cards.remove(panels[5]);// removed only for the first version
 		//cards.remove(panels[6]);// removed only for the first version
-
 		
 		cmbMode.addActionListener(this);
 		add(cards, BorderLayout.CENTER);
@@ -148,7 +141,7 @@ public class PanelReferenceImage extends GridPanel implements ActionListener {
 					new OperatorReference(progress, data, ReferenceImageConstant.modes[mode],"" +metric[0],""+spnPercentage.get());
 					
 			}
-			else if(cmbMethodPercentage.getSelectedItem() == metric[1]) // "Maximum"
+			else if(cmbMethodPercentage.getSelectedItem() == metric[1]) // "Median"
 			{
 				System.out.println("Median is selected");
 				new OperatorReference(progress, data, ReferenceImageConstant.modes[mode],"" +metric[1],""+spnPercentage.get());				
@@ -162,7 +155,7 @@ public class PanelReferenceImage extends GridPanel implements ActionListener {
 			{
 				System.out.println("Minimum is selected");
 				new OperatorReference(progress, data, ReferenceImageConstant.modes[mode],"" +metric[3],""+spnPercentage.get());				
-			}	
+			}
 		}
 		else if(mode == 4)
 		{
