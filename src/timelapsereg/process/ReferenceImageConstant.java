@@ -8,8 +8,9 @@ public class ReferenceImageConstant {
 			"file", 
 			"percentage", 
 			"range", 
-			//"sliding",    removed for the first version implementation
-			//"block"       removed for the first version implementation
+			// following 2 have been removed for the first version of the pluign
+			//"sliding",  
+			//"block"
 		};
 	public static String modesGUI[]	= { 
 			"Specified by a position", 
@@ -17,8 +18,9 @@ public class ReferenceImageConstant {
 			"Specified by file into the project directory",
 			"Computed over a percentage of frames", 
 			"Computed over a specified range of frames", 
-			//"Computed over a sliding range of frames", 	removed for the first version implementation
-			//"Computed over blocks of frames" 				removed for the first version implementation
+			// following 2 have been removed for the first version of the pluign
+			//"Computed over a sliding range of frames", 
+			//"Computed over blocks of frames"
 		};
 	
 }
