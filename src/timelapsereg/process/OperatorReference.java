@@ -1,17 +1,17 @@
 package timelapsereg.process;
 
-import java.io.File;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
-import ij.io.FileSaver;
 import ij.io.Opener;
 import ij.plugin.ImageCalculator;
+import ij.process.ImageConverter;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
+
+import java.io.File;
+
 import timelapsereg.gui.components.ProcessProgressBar;
-import timelapsereg.gui.ErrorDialog;
 
 public class OperatorReference {
 	
@@ -29,10 +29,12 @@ public class OperatorReference {
 				File[] files = dir.listFiles();
 				int count = 0;
 				for (int i = 0; i < files.length; i++) {
-					data.ref = opener.openImage(path + File.separator + files[i].getName());
-					if (data.ref != null) {
+					ImagePlus imp = opener.openImage(path + File.separator + files[i].getName());
+					if (imp != null) {
 						count++;
 						if (count == position) {
+							data.ref = imp.duplicate();
+							new ImageConverter(data.ref).convertToGray32();
 							int s = ImageStatistics.MEAN | ImageStatistics.STD_DEV;
 							ImageProcessor ip = data.ref.getProcessor();
 							ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
@@ -47,9 +49,7 @@ public class OperatorReference {
 			}
 		}
 		else if (mode.equals("window")) {
-			
-			ImagePlus imp = WindowManager.getImage(param2);
-			
+			ImagePlus imp = WindowManager.getImage(param1);
 			if (imp != null) {
 				data.ref = imp;
 				int s = ImageStatistics.MEAN | ImageStatistics.STD_DEV;
@@ -57,20 +57,10 @@ public class OperatorReference {
 				ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
 				data.mean = stats.mean;
 				data.stdev = stats.stdDev;
-				System.out.println("Successfully read!!");
-				imp.hide();
-				//imp.show();
-				return;
-			}
-			else
-			{
-				//new ErrorDialog();
-				System.out.println("Enter valid name for the image window");
 			}
 		}
 		else if (mode.equals("file")) {
-			ImagePlus imp = new Opener().openImage(path + File.separator + param2);
-			System.out.println(path + File.separator + param2 +" :::: File PATH");
+			ImagePlus imp = new Opener().openImage(data.pathProject + File.separator + param1);
 			if (imp != null) {
 				data.ref = imp;
 				int s = ImageStatistics.MEAN | ImageStatistics.STD_DEV;
@@ -78,10 +68,10 @@ public class OperatorReference {
 				ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
 				data.mean = stats.mean;
 				data.stdev = stats.stdDev;
-				//imp.show();
 			}
 		}
-		// following conditions illustrates a concept which has been replicated for computing the reference image over a specified range of frames also
+		// following conditions illustrates a concept which has been replicated for computing the
+		// reference image over a specified range of frames also
 		else if(mode.equals("percentage"))
 		{
 			ImageCalculator calc = new ImageCalculator();
@@ -158,13 +148,13 @@ public class OperatorReference {
 				System.out.println(param1+"   "+param2);
 			}
 			
-		}
-			
+		}	
 		else {
 			IJ.error("NOT YET IMPLEMENTED");
 		}
 
-	}
+	}//end of first constructor
+	
 	public OperatorReference(ProcessProgressBar progress, Data data, String mode, String param1, String param2, String param3)
 	{
 
@@ -201,14 +191,12 @@ public class OperatorReference {
 					i0 = calc.run("Average create 32-bit", i0, i1);
 				}
 				i0.setTitle("reference image");
-				//i0.show();
 				data.ref = i0;
 				int s = ImageStatistics.MEAN | ImageStatistics.STD_DEV;
 				ImageProcessor ip = data.ref.getProcessor();
 				ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
 				data.mean = stats.mean;
 				data.stdev = stats.stdDev;
-				//data.ref.show();
 				
 				System.out.println(param1+"   "+param2+"   "+param3);
 			}
@@ -221,14 +209,12 @@ public class OperatorReference {
 					i0 = calc.run("Min create 32-bit", i0, i1);
 				}
 				i0.setTitle("reference image");
-				//i0.show();
 				data.ref = i0;
 				int s = ImageStatistics.MEAN | ImageStatistics.STD_DEV;
 				ImageProcessor ip = data.ref.getProcessor();
 				ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
 				data.mean = stats.mean;
 				data.stdev = stats.stdDev;
-				//data.ref.show();
 				
 				System.out.println(param1+"   "+param2+"  "+param3);
 			}
@@ -241,24 +227,18 @@ public class OperatorReference {
 					i0 = calc.run("Max create 32-bit", i0, i1);
 				}
 				i0.setTitle("reference image");
-				//i0.show();
 				data.ref = i0;
 				int s = ImageStatistics.MEAN | ImageStatistics.STD_DEV;
 				ImageProcessor ip = data.ref.getProcessor();
 				ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
 				data.mean = stats.mean;
-				data.stdev = stats.stdDev;
-				//data.ref.show();
-				
+				data.stdev = stats.stdDev;				
 				System.out.println(param1+"   "+param2+"  "+param3);
 			}
 			else
 			{
 				IJ.log("error in selection, not implemented currently");
-			}
-			
+			}			
 		}
-	
-	}
-
+	}	
 }
