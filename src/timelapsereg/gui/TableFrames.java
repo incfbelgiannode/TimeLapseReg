@@ -1,8 +1,14 @@
 package timelapsereg.gui;
 
+import ij.ImagePlus;
+import ij.io.Opener;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.io.File;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
@@ -11,10 +17,11 @@ import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+
 import timelapsereg.process.Data;
 import timelapsereg.process.Frame;
 
-public class TableFrames extends JTable {
+public class TableFrames extends JTable implements MouseListener {
 
 	private JFrame	frame;
 	private Color	colorRed	= new Color(255, 125, 120);
@@ -22,7 +29,10 @@ public class TableFrames extends JTable {
 	private Color	colorOrange	= new Color(232, 252, 137);
 	private Color	colorNo		= new Color(232, 232, 237);
 
-	private String[]	headers	= new String[] { "#", "Time (ms)", "Filename", "Mean", "Sdtdev", "Content", "Transformation", "RMSE" };
+	public static String[]	headers	= new String[] { 
+		"#", "Time (ms)", "Filename", "Mean", "Sdtdev", "Content", 
+		"DX", "DY", "Angle", "RMSE Before", "RMSE After",
+		"Source1", "Source2", "Source3", "Target1", "Target2", "Target3"};
 	private Data		data;
 
 	public TableFrames(Data data) {
@@ -41,6 +51,9 @@ public class TableFrames extends JTable {
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setRowSelectionAllowed(true);
 		this.data = data;
+		setAutoCreateRowSorter(true);
+
+		addMouseListener(this);
 
 		setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
@@ -85,6 +98,41 @@ public class TableFrames extends JTable {
 		}
 	}
 
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		if (e.getClickCount() == 2) {
+			JTable target = (JTable) e.getSource();
+			int row = target.getSelectedRow();
+			String name = (String)this.getModel().getValueAt(row, 2);
+			Opener opener = new Opener();
+			ImagePlus imp = opener.openImage(data.pathSource + File.separator + name);
+			if (imp != null)
+				imp.show();
+		}
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mousePressed(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+	}
 	public class FramesRenderer extends DefaultTableCellRenderer {
 		@Override
 		public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
@@ -102,5 +150,4 @@ public class TableFrames extends JTable {
 			return c;
 		}
 	}
-
 }
