@@ -23,13 +23,17 @@ public class Frame {
 	private int		ny		= 0;
 	private Status	status	= Status.NONE;
 
-	private Transformation transformation = new Transformation();
+	private double rmseBefore = -1.0;
+	private double rmseAfter = -1.0;
+	
+	private Transformation transformation;
 
 	public Frame(int number, double framerate, String path, String filename, ImagePlus imp) {
 		this.number = number;
 		this.time = (number) / framerate * 1000;
 		this.path = path;
 		this.filename = filename;
+		this.transformation = new Transformation(imp.getWidth(), imp.getHeight());
 		int s = ImageStatistics.MEAN | ImageStatistics.STD_DEV;
 		ImageProcessor ip = imp.getProcessor();
 		nx = ip.getWidth();
@@ -47,21 +51,26 @@ public class Frame {
 		this.status = status;
 	}
 
-	public void setTransformation(double dx, double dy, double angle) {
-		transformation.setTransformation(dx, dy, angle);
-	}
-
-	public double getTime() {
-		return time;
-	}
-
 	public Transformation getTransformation() {
 		return transformation;
 	}
 
+	public void setRMSE(double rmseBefore, double rmseAfter) {
+		this.rmseBefore = rmseBefore;
+		this.rmseAfter = rmseAfter;
+	}
+	
+	public double getTime() {
+		return time;
+	}
+
 	public String toCVS() {
-		return filename + ", " + isValid() + ", " + transformation.dx + ", " + transformation.dy + ", " + transformation.angle + ", " + transformation.beforeRMSE + ", " + transformation.afterRMSE
-				+ "\n";
+		String[] info = getInformation();
+		String csv = "";
+		for(int i=0; i<info.length-1; i++)
+			csv += info[i] + ", ";
+		csv += info[info.length-1];
+		return csv;
 	}
 
 	public String getFilename() {
@@ -113,6 +122,24 @@ public class Frame {
 			s = "Invalid stdev";
 		else if (status == Status.INVALID_TRANSFORMATION)
 			s = "Invalid transformation";
-		return new String[] { "" + number, Tools.format(time), filename, Tools.format(mean), Tools.format(stdev), s, transformation.toString() };
+		return new String[] { 
+				"" + number, 
+				Tools.format(time), 
+				filename, 
+				Tools.format(mean), 
+				Tools.format(stdev), 
+				s, 
+				Tools.format(transformation.dx),
+				Tools.format(transformation.dy),
+				Tools.format(transformation.angle),	
+				Tools.format(rmseBefore),
+				Tools.format(rmseAfter),
+				Tools.format(transformation.source[0].getX()) + "," + Tools.format(transformation.source[0].getY()),
+				Tools.format(transformation.source[1].getX()) + "," + Tools.format(transformation.source[1].getY()),
+				Tools.format(transformation.source[2].getX()) + "," + Tools.format(transformation.source[2].getY()),
+				Tools.format(transformation.target[0].getX()) + "," + Tools.format(transformation.target[0].getY()),
+				Tools.format(transformation.target[1].getX()) + "," + Tools.format(transformation.target[1].getY()),
+				Tools.format(transformation.target[2].getX()) + "," + Tools.format(transformation.target[2].getY()),	
+		};
 	}
 }
