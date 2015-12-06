@@ -49,6 +49,8 @@ public class PanelRegistration extends JPanel implements ActionListener, ChangeL
 	private SpinnerDouble		spnVariationMean	= new SpinnerDouble(20, 0, 9999, 0.5);
 	private SpinnerDouble		spnVariationStdev	= new SpinnerDouble(20, 0, 9999, 0.5);
 	private SpinnerDouble		spnFrameRate		= new SpinnerDouble(100, 0, 99999, 1);
+	private JTextField		txtNbFrames			= new JTextField("", 5);
+	
 	private SpinnerInteger		spnNbFrames			= new SpinnerInteger(999999, 1, 999999, 1);
 	private JTextField			txtNameContains		= new JTextField(".tif");
 	private NumericalLabel		txtReferenceMean	= new NumericalLabel();
@@ -99,6 +101,7 @@ public class PanelRegistration extends JPanel implements ActionListener, ChangeL
 		settings.record("cmbChartAs", cmbChartAs, "Translation and rotation");
 		settings.record("cmbDrawAs", cmbDrawAs, "Yellow");
 
+		
 		settings.record("chkCheckoutFill", chkCheckoutFill, true);
 		settings.record("chkCheckoutMedian", chkCheckoutMedian, true);
 		settings.record("chkCheckoutRegular", chkCheckoutRegular, true);
@@ -150,6 +153,8 @@ public class PanelRegistration extends JPanel implements ActionListener, ChangeL
 		pnCheckin.place(4, 0, "Maximum");
 		pnCheckin.place(4, 1, txtMaximumMean);
 		pnCheckin.place(4, 2, txtMaximumStdev);
+		pnCheckin.place(6, 0, "Status");
+		pnCheckin.place(6, 1, 2, 1, txtNbFrames);
 
 		// Step 4
 		GridToolbar pnSettings = new GridToolbar("Registration Settings");
@@ -159,15 +164,19 @@ public class PanelRegistration extends JPanel implements ActionListener, ChangeL
 		pnSettings.place(7, 0, "Resulting chart");
 		pnSettings.place(7, 1, 2, 1, cmbChartAs);
 		
+		/*
+		 * regularization is removed for this version
+		 * 
 		GridToolbar pnRegularization = new GridToolbar("Time Regularization");
 		pnRegularization.place(2, 0, chkCheckoutFill);
 		pnRegularization.place(2, 1, chkCheckoutMedian);
 		pnRegularization.place(4, 0, chkCheckoutRegular);
 		pnRegularization.place(4, 1, spnCheckoutRegular);
-		
+		*/
 		GridToolbar pnRegister = new GridToolbar(false);
 		pnRegister.place(6, 0, pnSettings);
-		pnRegister.place(7, 0, pnRegularization);
+		// removed for this version
+		//pnRegister.place(7, 0, pnRegularization);
 			
 		// Step 4
 		GridToolbar pnSaveAs = new GridToolbar("Output");
@@ -176,6 +185,8 @@ public class PanelRegistration extends JPanel implements ActionListener, ChangeL
 		pnSaveAs.place(7, 0, 3, 1, txtSaveAs);
 		pnRegister.place(7, 0, pnSaveAs);
 
+		/*
+		 * removed for this version maybe added later		 
 		GridToolbar pnDisplay = new GridToolbar("Display");
 		pnDisplay.place(8, 0, chkDisplayCenter);
 		pnDisplay.place(8, 1, cmbColorCenter);
@@ -183,10 +194,12 @@ public class PanelRegistration extends JPanel implements ActionListener, ChangeL
 		pnDisplay.place(9, 0, chkDisplayHorizon);
 		pnDisplay.place(9, 1, cmbColorHorizon);
 		pnDisplay.place(9, 2, spnOpacityHorizon);
-
+		 */
 		GridToolbar pnReport = new GridToolbar(false);
 		pnReport.place(6, 0, pnSaveAs);
-		pnReport.place(8, 0, pnDisplay);
+		
+		// removed for this version
+		//pnReport.place(8, 0, pnDisplay);
 
 		cards.add(pnSource, "source");
 		cards.add(pnRef, "reference");
@@ -385,7 +398,8 @@ public class PanelRegistration extends JPanel implements ActionListener, ChangeL
 	private void discard() {
 		double m = spnVariationMean.get();
 		double s = spnVariationStdev.get();
-		new OperatorDiscard(dialog.getProgressBar(), data, m, s);
+		OperatorDiscard op = new OperatorDiscard(dialog.getProgressBar(), data, m, s);
+		txtNbFrames.setText(op.getStatus());
 		data.updateTable();
 	}
 
