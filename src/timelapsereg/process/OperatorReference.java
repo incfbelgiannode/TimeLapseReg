@@ -12,6 +12,7 @@ import ij.process.ImageStatistics;
 import java.io.File;
 
 import timelapsereg.gui.components.ProcessProgressBar;
+import timelapsereg.gui.ErrorDialog;
 
 public class OperatorReference {
 	
@@ -77,13 +78,13 @@ public class OperatorReference {
 			ImageCalculator calc = new ImageCalculator();
 			
 			File dir = new File(path);
-			System.out.println(path);
+			//System.out.println(path);
 			String filenames[] = dir.list();
 			int percentage_length = (int) (Integer.parseInt(param2) *0.01 * filenames.length) ;
-			System.out.println(percentage_length+" Total files used to compute the average");
+			//System.out.println(percentage_length+" Total files used to compute the average");
 			for(int i=0 ; i<percentage_length ; i++)				
 					filenames[i] = (path+File.separator+filenames[i]);
-			System.out.println(filenames[0]+"::: "+filenames.length);
+			//System.out.println(filenames[0]+"::: "+filenames.length);
 			
 			if(param1.equalsIgnoreCase("Average"))
 			{
@@ -94,16 +95,14 @@ public class OperatorReference {
 					i0 = calc.run("Average create 32-bit", i0, i1);
 				}
 				i0.setTitle("reference image");
-				//i0.show();
 				data.ref = i0;
 				int s = ImageStatistics.MEAN | ImageStatistics.STD_DEV;
 				ImageProcessor ip = data.ref.getProcessor();
 				ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
 				data.mean = stats.mean;
 				data.stdev = stats.stdDev;
-				//data.ref.show();
 				
-				System.out.println(param1+"   "+param2);
+				//System.out.println(param1+"   "+param2);
 			}
 			else if(param1.equalsIgnoreCase("Minimum"))
 			{
@@ -114,22 +113,20 @@ public class OperatorReference {
 					i0 = calc.run("Min create 32-bit", i0, i1);
 				}
 				i0.setTitle("reference image");
-				//i0.show();
 				data.ref = i0;
 				int s = ImageStatistics.MEAN | ImageStatistics.STD_DEV;
 				ImageProcessor ip = data.ref.getProcessor();
 				ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
 				data.mean = stats.mean;
 				data.stdev = stats.stdDev;
-				//data.ref.show();
 				
-				System.out.println(param1+"   "+param2);
+				//System.out.println(param1+"   "+param2);
 			}
 			else if(param1.equalsIgnoreCase("Maximum"))
 			{
-				System.out.println("Currently Maximum is selected");
+				//System.out.println("Currently Maximum is selected");
 				ImagePlus i0 = new ImagePlus(filenames[0]);
-				System.out.println(filenames);
+				//System.out.println(filenames);
 				for(int i=0; i<percentage_length ; i++)
 				{
 					ImagePlus i1 = new ImagePlus(filenames[i]);
@@ -145,7 +142,7 @@ public class OperatorReference {
 				data.stdev = stats.stdDev;
 				//data.ref.show();
 				
-				System.out.println(param1+"   "+param2);
+				//System.out.println(param1+"   "+param2);
 			}
 			
 		}	
@@ -175,12 +172,13 @@ public class OperatorReference {
 			if(upper_limit > filenames.length)
 			{
 				IJ.log("Enter upper limit lesser than the number of files");
+				new ErrorDialog("limit_bug");
 				return;
 			}
 			int num_files = upper_limit - lower_limit;
 			for(int i=0 ; i<num_files ; i++)				
 					filenames[i] = (path+File.separator+filenames[i]);
-			System.out.println(filenames[0]+"::: "+filenames.length);
+			//System.out.println(filenames[0]+"::: "+filenames.length);
 			
 			if(param1.equalsIgnoreCase("Average"))
 			{
@@ -216,7 +214,7 @@ public class OperatorReference {
 				data.mean = stats.mean;
 				data.stdev = stats.stdDev;
 				
-				System.out.println(param1+"   "+param2+"  "+param3);
+				//System.out.println(param1+"   "+param2+"  "+param3);
 			}
 			else if(param1.equalsIgnoreCase("Maximum"))
 			{
@@ -233,7 +231,7 @@ public class OperatorReference {
 				ImageStatistics stats = ImageStatistics.getStatistics(ip, s, null);
 				data.mean = stats.mean;
 				data.stdev = stats.stdDev;				
-				System.out.println(param1+"   "+param2+"  "+param3);
+				//System.out.println(param1+"   "+param2+"  "+param3);
 			}
 			else
 			{
