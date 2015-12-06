@@ -4,6 +4,7 @@ import timelapsereg.gui.components.ProcessProgressBar;
 
 public class OperatorDiscard {
 
+	private String status = "not yet run";
 	public OperatorDiscard(ProcessProgressBar progress, Data data, double varMean, double varStdev) {
 		double m = data.getReferenceMean();
 		double s = data.getReferenceStdev();
@@ -27,7 +28,11 @@ public class OperatorDiscard {
 				}
 			}
 		}
-		String status = "" + count + " validated frames / " + data.frames.size() + " files";
+		status = "" + count + " validated frames / " + data.frames.size() + " files";
 		progress.progress(status, 100);
+	}
+	
+	public String getStatus() {
+		return status; 
 	}
 }
